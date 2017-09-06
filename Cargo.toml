@@ -1,0 +1,6 @@
+[package]
+name = "play-combine"
+version = "0.1.0"
+authors = ["Kino <p@kinon.sakura.ne.jp>"]
+
+[dependencies]
