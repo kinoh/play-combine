@@ -29,25 +29,17 @@ fn parse_vec<I>(input: I) -> ParseResult<Vec<i32>, I>
         .parse_stream(input)
 }
 
-pub struct TheParser {}
+pub fn parse<I>(input: I) -> ParseResult<TheData, I>
+    where I: Stream<Item=char> {
 
-impl TheParser {
-    pub fn new() -> Self {
-        TheParser {}
-    }
+    let mut p =
+        sep_by(parser(parse_num), char::spaces())
+        .skip(token(';'))
+        .and(sep_by(parser(parse_vec), char::spaces()))
+        .map(|t| {
+            let (ns, vs) = t;
+            TheData { num: ns, vec: vs }
+        });
 
-    pub fn parse<I>(&self, input: I) -> ParseResult<TheData, I>
-        where I: Stream<Item=char> {
-
-        let mut p =
-            sep_by(parser(parse_num), char::spaces())
-            .skip(token(';'))
-            .and(sep_by(parser(parse_vec), char::spaces()))
-            .map(|t| {
-                let (ns, vs) = t;
-                TheData { num: ns, vec: vs }
-            });
-
-        p.parse_stream(input)
-    }
+    p.parse_stream(input)
 }
