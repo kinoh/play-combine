@@ -1,10 +1,15 @@
 extern crate play_combine;
 
+use std::env;
 use play_combine::parser::TheParser;
 
 fn main() {
     let parser = TheParser::new();
 
-    println!("{:?}", parser.parse("abc"));
-    println!("{:?}", parser.parse("def"));
+    if let Some(s) = env::args().nth(1) {
+        println!("{:?}", parser.parse(s.as_str()));
+    }
+    else {
+        println!("No args");
+    }
 }
