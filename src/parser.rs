@@ -9,6 +9,12 @@ enum Token {
     Vec(Vec<i32>),
 }
 
+fn white<I>() -> combinator::With<char::Space<I>, char::Spaces<I>>
+    where I: Stream<Item=char> {
+
+    char::space().with(char::spaces())
+}
+
 fn parse_i32<I>(input: I) -> ParseResult<i32, I>
     where I: Stream<Item=char> {
 
@@ -21,7 +27,7 @@ fn parse_num<I>(input: I) -> ParseResult<i32, I>
     where I: Stream<Item=char> {
 
     char::string("num")
-        .with(char::spaces())
+        .with(white())
         .with(parser(parse_i32))
         .parse_stream(input)
 }
@@ -30,7 +36,7 @@ fn parse_vec<I>(input: I) -> ParseResult<Vec<i32>, I>
     where I: Stream<Item=char> {
 
     char::string("vec")
-        .with(char::spaces())
+        .with(white())
         .with(sep_by1(parser(parse_i32), token(',')))
         .parse_stream(input)
 }
@@ -42,7 +48,7 @@ pub fn parse<I>(input: I) -> ParseResult<TheData, I>
         sep_by::<Vec<Token>, _, _>(
             parser(parse_num).map(Token::Num)
                 .or(parser(parse_vec).map(Token::Vec)),
-            token(';'))
+            token(';').with(char::spaces()))
             .map(|ts| {
                 let mut data = TheData { num: vec![], vec: vec![] };
                 for t in ts {
