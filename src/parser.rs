@@ -3,6 +3,12 @@ extern crate combine;
 use self::combine::*;
 use ::data::TheData;
 
+#[derive(Debug)]
+enum Token {
+    Num(i32),
+    Vec(Vec<i32>),
+}
+
 fn parse_i32<I>(input: I) -> ParseResult<i32, I>
     where I: Stream<Item=char> {
 
@@ -33,13 +39,20 @@ pub fn parse<I>(input: I) -> ParseResult<TheData, I>
     where I: Stream<Item=char> {
 
     let mut p =
-        sep_by(parser(parse_num), char::spaces())
-        .skip(token(';'))
-        .and(sep_by(parser(parse_vec), char::spaces()))
-        .map(|t| {
-            let (ns, vs) = t;
-            TheData { num: ns, vec: vs }
-        });
+        sep_by::<Vec<Token>, _, _>(
+            parser(parse_num).map(Token::Num)
+                .or(parser(parse_vec).map(Token::Vec)),
+            token(';'))
+            .map(|ts| {
+                let mut data = TheData { num: vec![], vec: vec![] };
+                for t in ts {
+                    match t {
+                        Token::Num(n) => data.num.push(n),
+                        Token::Vec(v) => data.vec.push(v),
+                    }
+                }
+                data
+            });
 
     p.parse_stream(input)
 }
